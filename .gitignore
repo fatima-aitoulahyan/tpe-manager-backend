@@ -1,0 +1,12 @@
+.env
+__pycache__/
+*.pyc
+venv/
+env/
+media/
+db.sqlite3
+.idea/
+.vscode/
+celerybeat-schedule
+config/firebase-credentials.json
+celerybeat-schedule.db

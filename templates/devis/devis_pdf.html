@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Devis {{ devis.numero }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 11px;
+            line-height: 1.5;
+            color: #334155;
+            background: #ffffff;
+            padding: 50px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 50px;
+        }
+
+        .company-info {
+            max-width: 60%;
+        }
+
+        .company-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+        }
+
+        .company-details {
+            font-size: 11px;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        .quote-meta {
+            text-align: right;
+        }
+
+        .quote-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: #2563eb;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .quote-number {
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 8px;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .status-BROUILLON { background: #f1f5f9; color: #64748b; }
+        .status-ENVOYE    { background: #e0f2fe; color: #0369a1; }
+        .status-ACCEPTE   { background: #dcfce7; color: #15803d; }
+        .status-REFUSE    { background: #fee2e2; color: #b91c1c; }
+        .status-EXPIRE    { background: #ffedd5; color: #c2410c; }
+
+        .billing-section {
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 24px;
+            margin-bottom: 40px;
+        }
+
+        .billing-box {
+            width: 45%;
+        }
+
+        .billing-box h3 {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #94a3b8;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .client-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .client-details {
+            font-size: 11px;
+            color: #475569;
+            line-height: 1.6;
+        }
+
+        .details-box {
+            width: 45%;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .details-table {
+            border-collapse: collapse;
+        }
+
+        .details-table td {
+            padding: 3px 0;
+            font-size: 11px;
+        }
+
+        .details-table td.label {
+            color: #64748b;
+            text-align: right;
+            padding-right: 15px;
+            font-weight: 500;
+        }
+
+        .details-table td.value {
+            color: #0f172a;
+            font-weight: 600;
+            text-align: right;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+
+        .items-table th {
+            border-bottom: 2px solid #e2e8f0;
+            padding: 12px 8px;
+            text-align: left;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 0.5px;
+        }
+
+        .items-table th.text-right { text-align: right; }
+        .items-table th.text-center { text-align: center; }
+
+        .items-table td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 11px;
+            color: #334155;
+            vertical-align: top;
+        }
+
+        .items-table td.description {
+            font-weight: 500;
+            color: #0f172a;
+        }
+
+        .items-table td.text-right { text-align: right; }
+        .items-table td.text-center { text-align: center; }
+
+        .totals-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 40px;
+        }
+
+        .totals-box {
+            width: 260px;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 4px;
+            font-size: 11px;
+            color: #475569;
+        }
+
+        .total-row.border-bottom {
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .total-row.grand-total {
+            border-top: 1px solid #e2e8f0;
+            padding-top: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #2563eb;
+        }
+
+        .notes-section {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 40px;
+            border: 1px solid #f1f5f9;
+        }
+
+        .notes-section h4 {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .notes-section p {
+            color: #475569;
+            font-size: 11px;
+            line-height: 1.6;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            color: #94a3b8;
+            font-size: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="company-info">
+        <div class="company-name">
+            {% if devis.user.nom_entreprise %}
+            {{ devis.user.nom_entreprise }}
+            {% else %}
+            {{ devis.user.prenom }} {{ devis.user.nom }}
+            {% endif %}
+        </div>
+        <div class="company-details">
+            {% if devis.user.ice %}
+            <strong>ICE :</strong> {{ devis.user.ice }}<br>
+            {% endif %}
+            {{ devis.user.email }}<br>
+            {{ devis.user.telephone }}
+        </div>
+    </div>
+    <div class="quote-meta">
+        <div class="quote-title">Devis</div>
+        <div class="quote-number">{{ devis.numero }}</div>
+        <div>
+            <span class="status-badge status-{{ devis.statut }}">
+                {{ devis.get_statut_display }}
+            </span>
+        </div>
+    </div>
+</div>
+<div class="billing-section">
+    <div class="billing-box">
+        <h3>Destinataire</h3>
+        <div class="client-name">{{ devis.client.nom }} {{ devis.client.prenom }}</div>
+        <div class="client-details">
+            {% if devis.client.nom_entreprise %}
+            <strong>{{ devis.client.nom_entreprise }}</strong><br>
+            {% endif %}
+            {% if devis.client.ice %}
+            ICE : {{ devis.client.ice }}<br>
+            {% endif %}
+            {% if devis.client.email %}
+            {{ devis.client.email }}<br>
+            {% endif %}
+            {% if devis.client.telephone %}
+            {{ devis.client.telephone }}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="details-box">
+        <h3>Détails</h3>
+        <table class="details-table">
+            <tr>
+                <td class="label">Date d'émission :</td>
+                <td class="value">{{ devis.date_creation }}</td>
+            </tr>
+            <tr>
+                <td class="label">Valable jusqu'au :</td>
+                <td class="value">{{ devis.date_validite }}</td>
+            </tr>
+            <tr>
+                <td class="label">Règlement :</td>
+                <td class="value">{{ devis.get_mode_paiement_display }}</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<table class="items-table">
+    <thead>
+    <tr>
+        <th style="width: 50%;">Désignation</th>
+        <th style="width: 20%;" class="text-right">Prix Unitaire</th>
+        <th style="width: 10%;" class="text-center">Qté</th>
+        <th style="width: 20%;" class="text-right">Montant HT</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for ligne in lignes %}
+    <tr>
+        <td class="description">{{ ligne.libelle }}</td>
+        <td class="text-right">{{ ligne.prix_unitaire }} MAD</td>
+        <td class="text-center">{{ ligne.quantite }}</td>
+        <td class="text-right">{{ ligne.total }} MAD</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<div class="totals-container">
+    <div class="totals-box">
+        <div class="total-row border-bottom">
+            <span>Total HT</span>
+            <strong>{{ devis.calculer_montant_ht|floatformat:2 }} MAD</strong>
+        </div>
+        <div class="total-row border-bottom">
+            <span>TVA ({{ devis.taux_tva }}%)</span>
+            <strong>{{ devis.taux_tva }} %</strong>
+        </div>
+        <div class="total-row grand-total">
+            <span>Total TTC</span>
+            <span>{{ devis.calculer_montant_ttc|floatformat:2 }} MAD</span>
+        </div>
+    </div>
+</div>
+
+{% if devis.conditions %}
+<div class="notes-section">
+    <h4>Conditions particulières</h4>
+    <p>{{ devis.conditions }}</p>
+</div>
+{% endif %}
+
+<div class="footer">
+    <p>Ce devis est valable jusqu'au {{ devis.date_validite }} • Mode de paiement : {{ devis.get_mode_paiement_display }}</p>
+    <p style="margin-top: 5px; font-size: 9px; color: #cbd5e1;">Généré automatiquement par TPE Manager</p>
+</div>
+
+</body>
+</html>
