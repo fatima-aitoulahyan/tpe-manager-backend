@@ -76,13 +76,15 @@ cd tpe-manager-backend
 
 ## Configuration
 
-1. Copier le fichier d'exemple d'environnement :
+### 1. Variables d'environnement
+
+Copier le fichier d'exemple d'environnement :
 
 ```bash
 cp .env.example .env
 ```
 
-2. Remplir les variables dans `.env` :
+Remplir les variables dans `.env` :
 
 ```env
 SECRET_KEY=
@@ -106,11 +108,45 @@ EMAIL_HOST_PASSWORD=
 DEFAULT_FROM_EMAIL=
 ```
 
-3. Placer les identifiants Firebase (fichier de compte de service) dans :
+### 2. Identifiants Firebase
+
+Placer le fichier de compte de service Firebase dans :
 
 ```
 config/firebase-credentials.json
 ```
+
+### 3. Configuration réseau (test sur appareil mobile physique)
+
+Si vous testez l'application Flutter sur un téléphone physique (et non un émulateur), le backend doit être accessible depuis l'adresse IP locale de votre machine sur le réseau Wi-Fi.
+
+**a) Trouvez votre adresse IP locale**
+
+Windows :
+```bash
+ipconfig
+```
+
+Mac / Linux :
+```bash
+ifconfig
+```
+
+Cherchez l'adresse IPv4 de votre carte Wi-Fi/Ethernet active (ex. `192.168.1.42`).
+
+**b) Ajoutez cette adresse dans `ALLOWED_HOSTS`**, dans `core/settings.py` :
+
+```python
+ALLOWED_HOSTS = ['localhost', '192.168.1.42', 'web']  # remplacez par votre IP locale
+```
+
+**c) Renseignez la même adresse** dans le fichier `.env` de l'application mobile Flutter (`BASE_URL`), pour que le téléphone (sur le même réseau) puisse joindre l'API :
+
+```env
+BASE_URL=http://192.168.1.42:8000/api
+```
+
+> ⚠️ Cette adresse IP change selon le réseau Wi-Fi utilisé — pensez à la mettre à jour si vous changez de réseau.
 
 ## Lancer le projet
 
@@ -162,7 +198,7 @@ tpe_backend/
 ├── apps/                  # Applications métier
 ├── config/                # Fichiers de configuration sensibles (Firebase, etc.)
 ├── core/                  # Settings Django, Celery, URLs racine
-├── templates/             # Templates HTML 
+├── templates/             # Templates HTML
 ├── media/                 # Fichiers médias uploadés
 ├── utils/                 # Utilitaires partagés (ex: génération PDF)
 ├── docker-compose.yml
@@ -170,3 +206,9 @@ tpe_backend/
 ├── requirements.txt
 └── manage.py
 ```
+
+## Auteur
+
+Développé par Fatima Aitoulahyan
+
+Projet lié : [Application mobile TPE Manager](https://github.com/fatima-aitoulahyan/tpe-manager-mobile)
