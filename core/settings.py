@@ -145,7 +145,7 @@ SPECTACULAR_SETTINGS = {
 
 FIREBASE_CREDENTIALS_PATH = BASE_DIR / 'config' / 'firebase-credentials.json'
 
-CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_BROKER_URL = config('REDIS_URL', default='redis://tpemanager-redis-0ef48r:6379/0')
 
 CELERY_BEAT_SCHEDULER = 'celery.beat:PersistentScheduler'
 
@@ -192,10 +192,9 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
-CORS_ALLOWED_ORIGINS = config(
-    'CORS_ALLOWED_ORIGINS',
-    default='http://localhost:5173',
-    cast=lambda value: [origin.strip() for origin in value.split(',')]
-)
+CORS_ALLOWED_ORIGINS = [
+    "https://tpe.stage.enset.top",
+    "http://localhost:5173", # Pour garder le test en local si besoin
+]
 
 CORS_ALLOW_CREDENTIALS = True
