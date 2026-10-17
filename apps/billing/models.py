@@ -42,6 +42,8 @@ class Facture(models.Model):
     mode_paiement = models.CharField(max_length=20, choices=ModePaiement.choices, blank=True, null=True)
     conditions    = models.TextField(blank=True, null=True)
 
+    motif_archivage = models.TextField(blank=True, null=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -130,6 +132,9 @@ class Facture(models.Model):
     @property
     def est_issue_devis(self):
         return self.devis is not None
+    @property
+    def montant_tva(self):
+        return self.calculer_montant_ttc() - self.calculer_montant_ht()
 
 
 class LigneFacture(models.Model):

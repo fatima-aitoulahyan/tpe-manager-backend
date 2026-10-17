@@ -62,12 +62,11 @@ class FactureViewSet(viewsets.ModelViewSet):
     # ── POST /api/factures/{id}/change_status/ ──
     @action(detail=True, methods=['post'], url_path='change_status')
     def changer_statut(self, request, pk=None):
-        print("DATA REÇUE:", request.data)
         facture        = self.get_object()
         nouveau_statut = request.data.get('status', '').strip()
+        motif          = request.data.get('motif', '').strip()
         statuts_valides = Facture.StatutFacture.values
-        print("STATUTS VALIDES:", statuts_valides)        # ← ajout
-        print("NOUVEAU STATUT:", repr(nouveau_statut))
+
         if nouveau_statut not in statuts_valides:
             return Response(
                 {'error': f'Statut invalide. Choisir parmi : {statuts_valides}'},
@@ -83,10 +82,13 @@ class FactureViewSet(viewsets.ModelViewSet):
             )
 
         facture.statut = nouveau_statut
+        if nouveau_statut == Facture.StatutFacture.ARCHIVE and motif:
+            facture.motif_archivage = motif
         facture.save()
         return Response({
             'message': f'Statut changé en {nouveau_statut}',
-            'status':  facture.statut
+            'status':  facture.statut,
+            'motif_archivage': facture.motif_archivage,
         })
 
 
@@ -141,10 +143,9 @@ class FactureViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'])
     def pdf(self, request, pk=None):
         facture = self.get_object()
-        serializer = FactureSerializer(facture)
         path = generer_pdf('factures/facture_pdf.html', {
-            'facture': serializer.data,
-            'lignes':  serializer.data.get('lignes', []),
+            'facture': facture,
+            'lignes':  facture.lignes.all(),
         })
 
         return FileResponse(

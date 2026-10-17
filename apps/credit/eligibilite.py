@@ -1,7 +1,8 @@
 from decimal import Decimal
 from datetime import date, timedelta
-from django.db.models import Sum, Count
+from django.db.models import Sum
 from apps.billing.models import Facture
+from django.utils.translation import gettext as _
 
 
 def calculer_score_eligibilite(user):
@@ -25,12 +26,12 @@ def calculer_score_eligibilite(user):
         score += 40
     elif volume >= 20000:
         score += 25
-        conseils.append("Augmentez votre volume de facturation pour améliorer votre score.")
+        conseils.append(_("Augmentez votre volume de facturation pour améliorer votre score."))
     elif volume >= 5000:
         score += 10
-        conseils.append("Votre volume de facturation est encore faible.")
+        conseils.append(_("Votre volume de facturation est encore faible."))
     else:
-        conseils.append("Commencez à facturer régulièrement pour construire votre historique.")
+        conseils.append(_("Commencez à facturer régulièrement pour construire votre historique."))
 
     anciennete_jours = (date.today() - user.created_at.date()).days
     if anciennete_jours >= 365:
@@ -39,9 +40,10 @@ def calculer_score_eligibilite(user):
         score += 20
     elif anciennete_jours >= 90:
         score += 10
-        conseils.append("Votre compte est encore récent. L'ancienneté améliore l'éligibilité.")
+        conseils.append(_("Votre compte est encore récent. L'ancienneté améliore l'éligibilité."))
     else:
-        conseils.append("Continuez à utiliser l'application pour augmenter votre ancienneté.")
+        conseils.append(_("Continuez à utiliser l'application pour augmenter votre ancienneté."))
+
     factures_en_attente = Facture.objects.filter(
         user=user,
         statut__in=['EN_ATTENTE', 'PARTIELLEMENT_PAYEE']
@@ -59,14 +61,14 @@ def calculer_score_eligibilite(user):
             score += 30
         elif taux_regularite >= 50:
             score += 15
-            conseils.append("Régularisez vos factures en attente pour améliorer votre score.")
+            conseils.append(_("Régularisez vos factures en attente pour améliorer votre score."))
         else:
-            conseils.append("Trop de factures impayées. Régularisez-les en priorité.")
+            conseils.append(_("Trop de factures impayées. Régularisez-les en priorité."))
     else:
-        conseils.append("Émettez et encaissez des factures pour évaluer votre régularité.")
+        conseils.append(_("Émettez et encaissez des factures pour évaluer votre régularité."))
 
     if not user.statut_fiscal:
-        conseils.append("Complétez votre profil fiscal pour améliorer votre éligibilité.")
+        conseils.append(_("Complétez votre profil fiscal pour améliorer votre éligibilité."))
 
     score = min(score, Decimal('100'))
 

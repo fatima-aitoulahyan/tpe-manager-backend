@@ -10,3 +10,4 @@ db.sqlite3
 celerybeat-schedule
 config/firebase-credentials.json
 celerybeat-schedule.db
+.venv

@@ -10,7 +10,7 @@ class JustificatifInline(admin.TabularInline):
 
 class OffreFinancementInline(admin.TabularInline):
     model = OffreFinancement
-    extra = 1   # permet d'ajouter facilement une offre
+    extra = 1
 
 
 @admin.register(DemandeFinancement)

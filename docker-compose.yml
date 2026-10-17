@@ -1,87 +1,94 @@
 version: '3.8'
 
+
 services:
   db:
     image: postgres:15-alpine
-    container_name: tpe_postgres_db
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
+    restart: unless-stopped
     environment:
-      - POSTGRES_DB=tpe_db
-      - POSTGRES_USER=tpe_admin
-      - POSTGRES_PASSWORD=secure_pass_2026
-    ports:
-      - "5432:5432"
+      POSTGRES_DB: ${DB_NAME:?Define DB_NAME}
+      POSTGRES_USER: ${DB_USER:?Define DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - tpe-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
-    container_name: tpe_redis_broker
-    ports:
-      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - tpe-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   web:
     build: .
-    container_name: tpe_django_web
-    command: python manage.py runserver 0.0.0.0:8000
-    volumes:
-      - .:/app
-    ports:
-      - "8000:8000"
+    restart: unless-stopped
+    command: gunicorn core.wsgi:application --bind 0.0.0.0:8000
     env_file:
       - .env
     environment:
-      - DB_NAME=tpe_db
-      - DB_USER=tpe_admin
-      - DB_PASSWORD=secure_pass_2026
-      - DB_HOST=db
-      - CELERY_BROKER_URL=redis://redis:6379/0
+      DB_HOST: db
+      DB_PORT: "5432"
+      CELERY_BROKER_URL: redis://redis:6379/0
     depends_on:
-      - db
-      - redis
-    dns:
-      - 1.1.1.1
-      - 8.8.8.8
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    expose:
+      - "8000"
+    networks:
+      - tpe-network
 
   celery_worker:
     build: .
-    container_name: tpe_celery_worker
+    restart: unless-stopped
     command: celery -A core worker --loglevel=info
-    volumes:
-      - .:/app
     env_file:
       - .env
     environment:
-      - DB_NAME=tpe_db
-      - DB_USER=tpe_admin
-      - DB_PASSWORD=secure_pass_2026
-      - DB_HOST=db
-      - CELERY_BROKER_URL=redis://redis:6379/0
+      DB_HOST: db
+      DB_PORT: "5432"
+      CELERY_BROKER_URL: redis://redis:6379/0
     depends_on:
-      - db
-      - redis
-      - web
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - tpe-network
 
   celery_beat:
     build: .
-    container_name: tpe_celery_beat
+    restart: unless-stopped
     command: celery -A core beat --loglevel=info
-    volumes:
-      - .:/app
     env_file:
       - .env
     environment:
-      - DB_NAME=tpe_db
-      - DB_USER=tpe_admin
-      - DB_PASSWORD=secure_pass_2026
-      - DB_HOST=db
-      - CELERY_BROKER_URL=redis://redis:6379/0
+      DB_HOST: db
+      DB_PORT: "5432"
+      CELERY_BROKER_URL: redis://redis:6379/0
     depends_on:
-      - db
-      - redis
-      - web
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - tpe-network
 
 volumes:
   postgres_data:
+
+networks:
+  tpe-network:
+    driver: bridge

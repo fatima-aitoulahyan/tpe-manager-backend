@@ -1,6 +1,8 @@
 from rest_framework import serializers
+
 from apps.clients.serializers import ClientSerializer
 from .models import Facture, LigneFacture
+
 
 class LigneFactureSerializer(serializers.ModelSerializer):
     total = serializers.ReadOnlyField()
@@ -31,11 +33,12 @@ class FactureSerializer(serializers.ModelSerializer):
             'client', 'client_detail',
             'devis', 'devis_numero', 'est_issue_devis',
             'lignes', 'montant_ht', 'montant_ttc', 'montant_tva',
+            'motif_archivage',
             'created_at', 'updated_at',
         ]
         read_only_fields = [
             'id', 'numero', 'date_emission',
-            'montant_total', 'created_at', 'updated_at'
+            'montant_total', 'motif_archivage', 'created_at', 'updated_at'
         ]
 
     def get_montant_ht(self, obj):
@@ -71,6 +74,8 @@ class FactureSerializer(serializers.ModelSerializer):
             instance.montant_total = instance.calculer_montant_ttc()
             instance.save()
         return instance
+
+
 class FactureListSerializer(serializers.ModelSerializer):
     client_nom  = serializers.SerializerMethodField()
     montant_ttc = serializers.SerializerMethodField()

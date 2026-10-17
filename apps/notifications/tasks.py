@@ -230,8 +230,9 @@ def rappel_declaration_fiscale():
 def rappel_cotisation_cnss():
     aujourd_hui = timezone.now().date()
 
-    if aujourd_hui.day != 19 or aujourd_hui.month != 6:
-        return
+    # Temporairement pour les tests
+    # if aujourd_hui.day != 19 or aujourd_hui.month != 6:
+    #     return
 
     prefs_list = PreferencesNotification.objects.filter(user__is_active=True).select_related('user')
 

@@ -1,6 +1,7 @@
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
 from apps.users.models import PasswordResetCode
@@ -16,6 +17,7 @@ from .serializers import (
     UserProfileSerializer,
     ChangePasswordSerializer, ConfigurationEmailSerializer
 )
+from .serializers import CustomTokenObtainPairSerializer
 
 User = get_user_model()
 
@@ -244,3 +246,6 @@ class ResetPasswordView(APIView):
         return Response({
             'message': 'Mot de passe réinitialisé avec succès.'
         })
+
+class CustomLoginView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer

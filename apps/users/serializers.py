@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
-
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from apps.users.models import ConfigurationEmail
 
 User = get_user_model()
@@ -41,10 +41,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'email', 'nom', 'prenom', 'telephone',
-            'ice', 'statut_fiscal',
+            'ice', 'statut_fiscal', 'role',
             'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'email', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'email', 'role', 'created_at', 'updated_at']
 
 
 class ChangePasswordSerializer(serializers.Serializer):
@@ -67,7 +67,6 @@ class ChangePasswordSerializer(serializers.Serializer):
         user.save()
         return user
 
-# apps/users/serializers.py
 class ConfigurationEmailSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConfigurationEmail
@@ -75,3 +74,11 @@ class ConfigurationEmailSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'email_password': {'write_only': True}
         }
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['role'] = user.role
+        token['nom'] = user.nom
+        return token

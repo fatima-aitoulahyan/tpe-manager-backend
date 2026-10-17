@@ -17,6 +17,7 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)
+        extra_fields.setdefault('role', 'admin')
 
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser doit avoir is_staff=True.')
@@ -25,6 +26,9 @@ class CustomUserManager(BaseUserManager):
 
         return self.create_user(email, password, **extra_fields)
 class User(AbstractUser):
+    class Role(models.TextChoices):
+        TPE_OWNER = 'tpe_owner', 'Propriétaire TPE'
+        ADMIN = 'admin', 'Administrateur'
     username = None
     email = models.EmailField(unique=True)
     telephone = models.CharField(max_length=20, unique=True)
@@ -43,6 +47,11 @@ class User(AbstractUser):
             ('freelance', 'Freelance'),
             ('commercant', 'Commerçant'),
         ]
+    )
+    role = models.CharField(
+        max_length=20,
+        choices=Role.choices,
+        default=Role.TPE_OWNER
     )
 
     created_at = models.DateTimeField(auto_now_add=True)

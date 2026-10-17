@@ -268,25 +268,19 @@
 <div class="billing-section">
     <div class="billing-box">
         <h3>Destinataire</h3>
-        <div class="client-name">
-            {% if facture.client_detail %}
-            {{ facture.client_detail.nom }} {{ facture.client_detail.prenom }}
-            {% else %}
-            {{ facture.client_nom }}
-            {% endif %}
-        </div>
+        <div class="client-name">{{ facture.client.nom }} {{ facture.client.prenom }}</div>
         <div class="client-details">
-            {% if facture.client_detail.nom_entreprise %}
-            <strong>{{ facture.client_detail.nom_entreprise }}</strong><br>
+            {% if facture.client.nom_entreprise %}
+            <strong>{{ facture.client.nom_entreprise }}</strong><br>
             {% endif %}
-            {% if facture.client_detail.ice %}
-            ICE : {{ facture.client_detail.ice }}<br>
+            {% if facture.client.ice %}
+            ICE : {{ facture.client.ice }}<br>
             {% endif %}
-            {% if facture.client_detail.email %}
-            {{ facture.client_detail.email }}<br>
+            {% if facture.client.email %}
+            {{ facture.client.email }}<br>
             {% endif %}
-            {% if facture.client_detail.telephone %}
-            {{ facture.client_detail.telephone }}
+            {% if facture.client.telephone %}
+            {{ facture.client.telephone }}
             {% endif %}
         </div>
     </div>
@@ -302,18 +296,10 @@
                 <td class="label">Date d'échéance :</td>
                 <td class="value">{{ facture.date_echeance|date:"d/m/Y"|default:"--" }}</td>
             </tr>
-            {% if facture.mode_paiement %}
             <tr>
                 <td class="label">Règlement :</td>
-                <td class="value">{{ facture.mode_paiement }}</td>
+                <td class="value">{{ facture.get_mode_paiement_display }}</td>
             </tr>
-            {% endif %}
-            {% if facture.devis_numero %}
-            <tr>
-                <td class="label">Issu du Devis :</td>
-                <td class="value">{{ facture.devis_numero }}</td>
-            </tr>
-            {% endif %}
         </table>
     </div>
 </div>
@@ -328,16 +314,12 @@
     </tr>
     </thead>
     <tbody>
-    {% for ligne in facture.lignes %}
+    {% for ligne in lignes %}
     <tr>
         <td class="description">{{ ligne.libelle }}</td>
-        <td class="text-right">{{ ligne.prix_unitaire|floatformat:2 }} MAD</td>
-        <td class="text-center">{{ ligne.quantite|floatformat:0 }}</td>
-        <td class="text-right">{{ ligne.total|floatformat:2 }} MAD</td>
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="4" style="text-align: center; color: #94a3b8; padding: 20px;">Aucune prestation enregistrée</td>
+        <td class="text-right">{{ ligne.prix_unitaire }} MAD</td>
+        <td class="text-center">{{ ligne.quantite }}</td>
+        <td class="text-right">{{ ligne.total }} MAD</td>
     </tr>
     {% endfor %}
     </tbody>
@@ -347,7 +329,7 @@
     <div class="totals-box">
         <div class="total-row border-bottom">
             <span>Total HT</span>
-            <strong>{{ facture.montant_ht|floatformat:2 }} MAD</strong>
+            <strong>{{ facture.calculer_montant_ht|floatformat:2 }} MAD</strong>
         </div>
         <div class="total-row border-bottom">
             <span>TVA ({{ facture.taux_tva }}%)</span>
@@ -355,13 +337,13 @@
         </div>
         <div class="total-row grand-total">
             <span>Total TTC</span>
-            <span>{{ facture.montant_ttc|floatformat:2 }} MAD</span>
+            <span>{{ facture.calculer_montant_ttc|floatformat:2 }} MAD</span>
         </div>
-        <div class="total-row" style="color: #16a34a; font-weight: 500;">
+        <div class="total-row border-bottom" style="color: #16a34a; font-weight: 500;">
             <span>Montant Payé</span>
             <span>{{ facture.montant_paye|floatformat:2 }} MAD</span>
         </div>
-        <div class="total-row" style="color: #ea580c; font-weight: 700; border-top: 1px dashed #e2e8f0; padding-top: 8px; margin-top: 4px;">
+        <div class="total-row" style="color: #ea580c; font-weight: 700;">
             <span>Reste à payer</span>
             <span>{{ facture.reste_a_payer|floatformat:2 }} MAD</span>
         </div>

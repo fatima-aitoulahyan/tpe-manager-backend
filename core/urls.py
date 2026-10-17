@@ -15,6 +15,7 @@ urlpatterns = [
     path('api/tresorerie/', include('apps.cashflow.urls')),
     path('api/notifications/', include('apps.notifications.urls')),
     path('api/credit/', include('apps.credit.urls')),
+    path('api/admin/', include('apps.adminpanel.urls')),
 
     # Swagger
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

@@ -2,28 +2,34 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django.db.models import Sum
+from django.db.models import Sum, Q, CharField
+from django.db.models.functions import Cast
 from django.utils import timezone
 from .models import Transaction
 from .serializers import TransactionSerializer
 from rest_framework.pagination import PageNumberPagination
+
+
 class TransactionPagination(PageNumberPagination):
-    page_size             = 20
+    page_size = 20
     page_size_query_param = 'page_size'
-    max_page_size         = 100
+    max_page_size = 100
+
+
 class TransactionViewSet(viewsets.ModelViewSet):
-    serializer_class   = TransactionSerializer
+    serializer_class = TransactionSerializer
     permission_classes = [IsAuthenticated]
-    pagination_class   = TransactionPagination
+    pagination_class = TransactionPagination
 
     def get_queryset(self):
         qs = Transaction.objects.filter(user=self.request.user)
 
         # Filtres
-        type_t     = self.request.query_params.get('type')
-        categorie  = self.request.query_params.get('categorie')
+        type_t = self.request.query_params.get('type')
+        categorie = self.request.query_params.get('categorie')
         date_debut = self.request.query_params.get('date_debut')
-        date_fin   = self.request.query_params.get('date_fin')
+        date_fin = self.request.query_params.get('date_fin')
+        search = self.request.query_params.get('search')
 
         if type_t:
             qs = qs.filter(type=type_t)
@@ -33,6 +39,20 @@ class TransactionViewSet(viewsets.ModelViewSet):
             qs = qs.filter(date__gte=date_debut)
         if date_fin:
             qs = qs.filter(date__lte=date_fin)
+        if search:
+            search = search.strip()
+            # date et montant sont castés en texte pour permettre une recherche partielle
+            # (ex. "2026-08" pour un mois, "1500" pour un montant)
+            qs = qs.annotate(
+                date_str=Cast('date', output_field=CharField()),
+                montant_str=Cast('montant', output_field=CharField()),
+            ).filter(
+                Q(description__icontains=search)
+                | Q(categorie__icontains=search)
+                | Q(facture__numero__icontains=search)
+                | Q(date_str__icontains=search)
+                | Q(montant_str__icontains=search)
+            )
 
         return qs
 
@@ -46,7 +66,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def dashboard(self, request):
         aujourd_hui = timezone.now().date()
-        debut_mois  = aujourd_hui.replace(day=1)
+        debut_mois = aujourd_hui.replace(day=1)
 
         qs = Transaction.objects.filter(
             user=request.user,
@@ -73,9 +93,9 @@ class TransactionViewSet(viewsets.ModelViewSet):
                 cat, 0) + float(t.montant)
 
         return Response({
-            'recettes_mois':        float(recettes),
-            'depenses_mois':        float(depenses),
-            'solde':                float(recettes - depenses),
-            'categories_recettes':  categories_recettes,
-            'categories_depenses':  categories_depenses,
+            'recettes_mois': float(recettes),
+            'depenses_mois': float(depenses),
+            'solde': float(recettes - depenses),
+            'categories_recettes': categories_recettes,
+            'categories_depenses': categories_depenses,
         })
